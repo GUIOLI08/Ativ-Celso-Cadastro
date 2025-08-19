@@ -8,7 +8,7 @@ const port = 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
-app.use(express.static(path.join(process.cwd())));
+app.use(express.static(path.join(process.cwd(), 'client')));
 
 const db = mysql.createConnection({
     host: 'localhost',
@@ -79,7 +79,7 @@ app.delete('/deletar/produto:id', (req, res) => {
         console.log(`Produto com ID ${productId} deletado com sucesso.`);
         res.sendStatus(204);
     });
-    
+
 });
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
