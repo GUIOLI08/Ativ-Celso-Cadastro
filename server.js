@@ -8,6 +8,7 @@ const port = 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
+app.use(express.static(path.join(process.cwd())));
 
 const db = mysql.createConnection({
     host: 'localhost',
@@ -17,7 +18,7 @@ const db = mysql.createConnection({
 });
 
 app.get('/', (req, res) => {
-    res.sendFile(process.cwd() + '/index.html');
+    res.sendFile(path.join(process.cwd() + '/index.html'));
 });
 
 app.post('/cadastrar/produto', (req, res) => {
@@ -39,10 +40,47 @@ app.post('/cadastrar/produto', (req, res) => {
 
         console.log('Dados inseridos com sucesso:', result);
         return res.redirect('/');
-        
+
     });
 });
 
+app.get('/mostrar/produtos', (req, res) => {
+
+    console.log('Requisição recebida para mostrar produtos');
+
+    const sql = "SELECT * FROM produto";
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Erro ao buscar produtos:', err);
+            return res.status(500).send('Erro ao buscar produtos.');
+        }
+
+        console.log('Produtos encontrados:', results);
+        res.json(results);
+    });
+});
+
+app.delete('/deletar/produto:id', (req, res) => {
+    
+    const productId = req.params.id;
+    console.log(`Requisição recebida para deletar produto com ID: ${productId}`);
+
+    if (!productId) {
+        return res.status(400).send('ID do produto não fornecido.');
+    }
+
+    const sql = "DELETE FROM produto WHERE id = ?";
+    db.query(sql, [productId], (err, result) => {
+        if (err) {
+            console.error('Erro ao deletar produto:', err);
+            return res.status(500).send('Erro ao deletar produto.');
+        }
+
+        console.log(`Produto com ID ${productId} deletado com sucesso.`);
+        res.sendStatus(204);
+    });
+    
+});
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
